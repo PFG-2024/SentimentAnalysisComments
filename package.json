@@ -6,7 +6,6 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "prod": "concurrently && uvicorn main:app && npm run dev",
     "started": "concurrently \".envpython/bin/uvicorn app:app --reload\" \"npm run dev\""
   },
