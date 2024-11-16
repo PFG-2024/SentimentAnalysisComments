@@ -1,76 +1,77 @@
 import { useState } from 'react';
-import axios from 'axios';
 import { useRouter } from 'next/router';
 
-export default function Home() {
-    const [url, setUrl] = useState('');
-    const [comments, setComments] = useState('');
-    const [result, setResult] = useState(null);
-    const [newsId, setNewsId] = useState('');
+const LoginPage = () => {
     const router = useRouter();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await axios.post('http://127.0.0.1:8000/comments', { url, comments });
-            setResult(response.data);
+    // Estado para almacenar los datos de entrada
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
-            // Obtener el ID de la noticia a partir de la URL
-            const idMatch = url.match(/#(\d+)/);
-            if (idMatch) {
-                setNewsId(idMatch[1]); // Guardar el ID en el estado
-            } else {
-                setNewsId(''); // Restablecer si no se encuentra el ID
+    // Datos de los usuarios (clave codificada en Base64)
+    const users = {
+        admin: btoa('admin123'), // Contraseña: "admin123"
+        joma: btoa('joma456'), // Contraseña: "joma456"
+    };
+
+    // Manejar el envío del formulario
+    const handleLogin = (e) => {
+        e.preventDefault();
+
+        // Validar usuario y contraseña
+        if (users[username] && users[username] === btoa(password)) {
+            // Redirigir al usuario dependiendo del rol
+            if (username === 'admin') {
+                router.push('/comentarios');
+            } else if (username === 'joma') {
+                router.push('/user-dashboard');
             }
-        } catch (error) {
-            console.error('Error procesando los comentarios:', error);
+        } else {
+            setErrorMessage('Usuario o contraseña incorrectos');
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 p-4">
-            <h1 className="text-4xl font-bold text-center text-blue-600 mb-6">
-                Administrador de Comentarios
-            </h1>
-            <form className="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-lg" onSubmit={handleSubmit}>
-                <label className="block mb-2 text-lg font-medium text-gray-700">URL de la noticia</label>
-                <input
-                    type="text"
-                    className="w-full p-4 border rounded-lg mb-4"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    placeholder="Ingresa la URL de la noticia"
-                />
-                <label className="block mb-2 text-lg font-medium text-gray-700">Comentarios (uno por línea)</label>
-                <textarea
-                    className="w-full p-4 border rounded-lg"
-                    value={comments}
-                    onChange={(e) => setComments(e.target.value)}
-                    placeholder="Pega todos los comentarios aquí, uno por línea..."
-                />
-                <button
-                    type="submit"
-                    className="w-full bg-blue-500 text-white p-2 mt-4 rounded-lg hover:bg-blue-600 transition"
-                >
-                    Procesar Comentarios
-                </button>
-            </form>
-
-            {result && (
-                <div className="mt-6 bg-gray-50 p-4 rounded-lg shadow-md">
-                    <h2 className="text-2xl font-semibold mb-4">Resultados:</h2>
-                    <pre className="whitespace-pre-wrap">{JSON.stringify(result, null, 2)}</pre>
-                    {/* Enlace a la página de sentimiento */}
-                    {newsId && (
-                        <a
-                            href={`/sentiment/${newsId}`}
-                            className="text-blue-600 hover:underline mt-4 inline-block"
-                        >
-                            Ver análisis de sentimiento
-                        </a>
-                    )}
-                </div>
-            )}
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="bg-white p-8 rounded shadow-md w-full max-w-sm">
+                <h1 className="text-2xl font-semibold mb-6 text-center">Iniciar Sesión en Administrador de comentarios</h1>
+                {errorMessage && (
+                    <p className="text-red-500 text-center mb-4">{errorMessage}</p>
+                )}
+                <form onSubmit={handleLogin}>
+                    <div className="mb-4">
+                        <label htmlFor="username" className="block text-gray-700">Usuario</label>
+                        <input
+                            type="text"
+                            id="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="w-full p-2 border rounded"
+                            required
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label htmlFor="password" className="block text-gray-700">Contraseña</label>
+                        <input
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full p-2 border rounded"
+                            required
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                    >
+                        Ingresar
+                    </button>
+                </form>
+            </div>
         </div>
     );
-}
+};
+
+export default LoginPage;
