@@ -59,12 +59,12 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
       
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_50F99D00E6D048A79036C27E5B45207B }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_AE2EBC5C1E3047CA85E29778BDA4B71F }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0BA424330E024FB58BCB0B1332215558 }}
+      #- name: Login to Azure
+      #  uses: azure/login@v2
+      #  with:
+      #    client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_50F99D00E6D048A79036C27E5B45207B }}
+      #    tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_AE2EBC5C1E3047CA85E29778BDA4B71F }}
+      #    subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0BA424330E024FB58BCB0B1332215558 }}
 
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
@@ -73,4 +73,5 @@ jobs:
           app-name: 'sentiment-analysis-comments'
           slot-name: 'test'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
           
