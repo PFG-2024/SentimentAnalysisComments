@@ -13,7 +13,7 @@ news_collection = db['news']
 
 # Inicializar Flask
 app = Flask(__name__)
-CORS(app)  # Habilitar CORS para todas las rutas
+CORS(app, origins=["http://20.64.242.135:3000"])  # Habilitar CORS para todas las rutas
 
 # Inicializar el analizador de VADER
 analyzer = SentimentIntensityAnalyzer()
