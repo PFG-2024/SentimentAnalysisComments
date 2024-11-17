@@ -1,3 +1,4 @@
+import certifi
 from flask import Flask, request, jsonify
 from flask_cors import CORS  # Importa CORS
 from pymongo import MongoClient
@@ -22,7 +23,7 @@ analyzer = SentimentIntensityAnalyzer()
 def scrape_news_data(news_url):
     try:
         # Hacer la solicitud a la página
-        response = requests.get(news_url)
+        response = requests.get(news_url, verify=certifi.where())
         if response.status_code != 200:
             return None, f"Error: {response.status_code}"
 
