@@ -20,3 +20,4 @@ textblob==0.18.0.post0
 tqdm==4.66.5
 urllib3==2.2.3
 Werkzeug==3.0.4
+gunicorn==23.0.0

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "prod": "concurrently && uvicorn main:app && npm run dev",
-    "started": "concurrently \"uvicorn app:app --log-level=debug\" \"npm run dev\""
+    "started": "concurrently \"gunicorn app:app --log-level=debug\" \"npm run dev\""
   },
   "dependencies": {
     "axios": "^1.7.7",
