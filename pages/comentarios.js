@@ -19,7 +19,8 @@ export default function Home() {
             }
 
             // Enviar la solicitud a la API
-            const response = await axios.post('http://127.0.0.1:8000/comments', { url, comments });
+            const apiUrl = 'http://20.64.242.135:8000'; // IP pública de tu backend
+            const response = await axios.post(`${apiUrl}/comments`, { url, comments });
             setResult(response.data);
 
             // Obtener el ID de la noticia a partir de la URL

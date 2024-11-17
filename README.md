@@ -39,3 +39,9 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 source .envpython/bin/activate
 npm run started
 
+curl -X POST http://20.64.242.135:8000/comments -H "Content-Type: application/json" -d '{
+                           "url": "https://www.eltiempo.com/politica/partidos-politicos/vicky-davila-se-despidio-de-semana-y-apunto-oficialmente-a-la-presidencia-esta-es-su-carta-3400276#3400276",
+                           "comments": "Hace 1 hora\nQue cuente con mi voto y cinco de mi casa.\n"
+                       }'
+
+curl -X DELETE http://20.64.242.135:8000/comments/id/3400276
