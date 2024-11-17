@@ -12,6 +12,13 @@ export default function Home() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            // Validación simple
+            if (!url || !comments) {
+                console.error('La URL y los comentarios son obligatorios');
+                return;
+            }
+
+            // Enviar la solicitud a la API
             const response = await axios.post('http://127.0.0.1:8000/comments', { url, comments });
             setResult(response.data);
 
