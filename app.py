@@ -1,4 +1,4 @@
-import certifi
+import re
 from flask import Flask, request, jsonify
 from flask_cors import CORS  # Importa CORS
 from pymongo import MongoClient
@@ -61,12 +61,19 @@ def process_comments(raw_comments):
     
     for line in lines:
         line = line.strip()
+        
+        # Ignorar comentarios que comienzan con "Respuesta de"
+        if line.lower().startswith("respuesta de"):
+            continue
+        
         # Detectamos comentarios con la palabra clave "Comentario de"
         if line.lower().startswith('comentario de'):
             current_author = line.replace('Comentario de', '').strip('. ')
-        # Detectamos la fecha de los comentarios
-        elif line.lower().startswith('hace'):
+        
+        # Detectamos la fecha de los comentarios, buscando el patrón "Hace x horas/días"
+        elif re.match(r'hace.*', line, re.IGNORECASE):
             current_date = line
+        
         # Para cualquier otro tipo de línea, la tomamos como contenido del comentario
         elif line and not line.lower() == 'anuncio':  # Ignoramos la palabra "Anuncio"
             processed_comments.append({
@@ -74,10 +81,12 @@ def process_comments(raw_comments):
                 'date': current_date,
                 'content': line
             })
+            # Restablecemos el autor y la fecha solo cuando se ha procesado un comentario
             current_author = "Anonymous"  # Restablecemos el autor
             current_date = "Sin fecha"    # Restablecemos la fecha
 
     return processed_comments
+
 
 # Función para analizar el sentimiento de un comentario usando VADER
 def analyze_sentiment(comment):
