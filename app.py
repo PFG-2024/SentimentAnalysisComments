@@ -56,23 +56,26 @@ def process_comments(raw_comments):
     current_author = "Anonymous"  # Valor por defecto si no hay autor
     current_date = "Sin fecha"    # Valor por defecto si no hay fecha
 
-    lines = raw_comments.split('\n')
+    # Cambiamos la separación para reconocer los saltos de línea
+    lines = raw_comments.strip().split('\n')
+    
     for line in lines:
         line = line.strip()
-        if line.startswith('Comentario de'):  # Capturamos el autor
+        # Detectamos comentarios con la palabra clave "Comentario de"
+        if line.lower().startswith('comentario de'):
             current_author = line.replace('Comentario de', '').strip('. ')
-        elif line.startswith('Hace'):  # Capturamos la fecha
+        # Detectamos la fecha de los comentarios
+        elif line.lower().startswith('hace'):
             current_date = line
-        elif line:  # El resto es contenido del comentario
-            # Verificamos si el contenido no es "Anuncio"
-            if line.lower() != "anuncio":  # Comprobamos si no es solo "Anuncio"
-                processed_comments.append({
-                    'author': current_author,
-                    'date': current_date,
-                    'content': line
-                })
-            current_author = "Anonymous"  # Restablecemos los valores por defecto
-            current_date = "Sin fecha"
+        # Para cualquier otro tipo de línea, la tomamos como contenido del comentario
+        elif line and not line.lower() == 'anuncio':  # Ignoramos la palabra "Anuncio"
+            processed_comments.append({
+                'author': current_author,
+                'date': current_date,
+                'content': line
+            })
+            current_author = "Anonymous"  # Restablecemos el autor
+            current_date = "Sin fecha"    # Restablecemos la fecha
 
     return processed_comments
 
@@ -88,24 +91,20 @@ def analyze_sentiment(comment):
 
 # Función para categorizar la noticia
 def categorize_news(title, lead):
-    # Definimos las palabras clave para cada categoría
     categories = {
         'política': ['política', 'gobierno', 'elecciones', 'congreso', 'partidos', 'corrupcion'],
         'deportes': ['deportes', 'fútbol', 'baloncesto', 'atletismo', 'equipo'],
         'tragedias': ['tragedia', 'accidente', 'muerte', 'desastre', 'heridos'],
         'entretenimiento': ['entretenimiento', 'cine', 'música', 'espectáculos', 'celebridades'],
-        # Puedes agregar más categorías y sus palabras clave aquí
     }
 
-    # Combinamos el título y el lead para buscar en ambas cadenas
     combined_text = f"{title.lower()} {lead.lower()}"
-
-    # Verificamos cada categoría
+    
     for category, keywords in categories.items():
         if any(keyword in combined_text for keyword in keywords):
-            return category  # Retornamos la categoría que coincide
+            return category  # Retorna la categoría que coincide
 
-    return 'otros'  # Retornamos 'otros' si no coincide con ninguna categoría
+    return 'otros'
 
 # Ruta para recibir la URL de la noticia y los comentarios
 @app.route('/comments', methods=['POST'])
@@ -125,7 +124,7 @@ def add_comments():
     # Procesar los comentarios pegados manualmente
     processed_comments = process_comments(raw_comments)
 
-    # Analizar el sentimiento de cada comentario y agregarlo a los comentarios procesados
+    # Analizar el sentimiento de cada comentario
     for comment in processed_comments:
         comment['sentiment'] = analyze_sentiment(comment['content'])
 
@@ -166,14 +165,12 @@ def get_sentiment_stats_by_id(news_id):
     if not news_data:
         return jsonify({'message': 'No se encontraron datos para este ID'}), 404
 
-    # Obtener los comentarios
     comments = news_data['comments']
     total_comments = len(comments)
     
     if total_comments == 0:
         return jsonify({'message': 'No hay comentarios para esta noticia'}), 404
 
-    # Clasificar los comentarios según el sentimiento
     positive_comments = [c for c in comments if c['sentiment'] == 'positivo']
     negative_comments = [c for c in comments if c['sentiment'] == 'negativo']
     neutral_comments = [c for c in comments if c['sentiment'] == 'neutral']
@@ -182,37 +179,32 @@ def get_sentiment_stats_by_id(news_id):
     num_negative = len(negative_comments)
     num_neutral = len(neutral_comments)
 
-    # Calcular el número de usuarios únicos (si tienen 'user_id')
     unique_users = len(set([c['user_id'] for c in comments if 'user_id' in c]))
 
-    # Asignar puntuaciones de sentimiento (positivo=5, neutral=3, negativo=1)
     sentiment_scores = {
         'positivo': 5,
         'neutral': 3,
         'negativo': 1
     }
     total_sentiment_score = sum([sentiment_scores[c['sentiment']] for c in comments])
-    overall_sentiment = total_sentiment_score / total_comments  # Promedio de la valoración general
+    overall_sentiment = total_sentiment_score / total_comments
 
-    # Calcular el desglose de sentimientos en porcentaje
     sentiment_breakdown = {
         'positive': (num_positive / total_comments) * 100,
         'neutral': (num_neutral / total_comments) * 100,
         'negative': (num_negative / total_comments) * 100
     }
 
-    # Retornar los datos, incluyendo título, lead y categoría
     return jsonify({
         'title': news_data['news_data'].get('title', 'Título no disponible'),
         'lead': news_data['news_data'].get('lead', 'Lead no disponible'),
-        'category': news_data['news_data'].get('category', 'Categoría no disponible'),  # Añadido aquí
+        'category': news_data['news_data'].get('category', 'Categoría no disponible'),
         'overallSentiment': overall_sentiment,
         'totalComments': total_comments,
         'uniqueUsers': unique_users,
         'sentimentBreakdown': sentiment_breakdown,
         'comments': comments
     }), 200
-
 
 
 # Iniciar el servidor Flask
